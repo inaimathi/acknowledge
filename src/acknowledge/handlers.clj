@@ -71,7 +71,14 @@
   [prefix]
   (ring/->ResourcesMaybe {:prefix prefix}))
 
-(defn intern-static! [path handler]
+(defn files
+  [path]
+  (ring/->Files {:dir (string/replace path #"/+$" "")}))
+
+(def file files)
+
+(defn intern-static!
+  [path handler]
   (swap!
    routes-data
    (fn [dat]
