@@ -1,6 +1,6 @@
 (ns acknowledge.handlers-test
   (:require [clojure.test :refer [deftest testing is]]
-            [acknowledge.handlers :refer [string->bidi-path insert-new-handler]]))
+            [acknowledge.core :refer [string->bidi-path insert-new-handler]]))
 
 (deftest insert-new-handler-test
   (testing "leaves the first component of a path slash-free"
