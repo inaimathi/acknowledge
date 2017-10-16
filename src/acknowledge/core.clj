@@ -87,7 +87,6 @@
        (second dat)
        (bidi-method :any (string->bidi-path path))
        handler)])))
-;; (intern-static! "/static" (resources "public/"))
 
 (defmulti intern-handler-fn! (fn ([p _ _] (class p)) ([_ p _ _] (class p))))
 
@@ -110,6 +109,16 @@
           name)])))
    (swap! handler-table assoc name f)
    nil))
+
+(defn intern-error-fn!
+  [key f]
+  (let [allowed-keys #{:internal-error :not-found}]
+    (assert
+     (contains? allowed-keys key)
+     (str "The error key must be one of "
+          (string/join ", " allowed-keys)))
+    (swap! handler-table assoc key f)
+    nil))
 
 (def link-to (partial bidi/path-for @routes-data))
 
@@ -135,9 +144,10 @@
   [req]
   (let [routed-req (routed req)]
     (try
-      (if (keyword? (:handler routed))
-        ((get @handler-table (:handler routed)) routed-req)
-        ((:handler routed) routed-req))
+      ((if (keyword? (:handler routed))
+         (get @handler-table (:handler routed))
+         (:handler routed))
+       routed-req)
       (catch Exception e
         (try
           ((get @handler-table :internal-error) routed-req)
