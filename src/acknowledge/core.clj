@@ -137,6 +137,7 @@
                           (into {}))]
     (assoc
      req
+     :handler (:handler routed)
      :route-params (or route-params {})
      :params (merge (:params req) route-params))))
 
@@ -144,9 +145,9 @@
   [req]
   (let [routed-req (routed req)]
     (try
-      ((if (keyword? (:handler routed))
-         (get @handler-table (:handler routed))
-         (:handler routed))
+      ((if (keyword? (:handler routed-req))
+         (get @handler-table (:handler routed-req))
+         (:handler routed-req))
        routed-req)
       (catch Exception e
         (try
