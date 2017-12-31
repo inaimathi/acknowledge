@@ -128,13 +128,13 @@
     res
     {:handler :not-found}))
 
-(defn parse-query-string
-  [query-string]
-  (if (empty? query-string)
+(defn parse-params
+  [param-string]
+  (if (empty? param-string)
     {}
-    (->> (clojure.string/split query-string #"&")
-             (map #(clojure.string/split % #"="))
-             (into {}))))
+    (->> (clojure.string/split param-string #"&")
+         (map #(clojure.string/split % #"="))
+         (into {}))))
 
 (defn routed
   [req]
@@ -144,7 +144,7 @@
                           (map (fn [[k v]] [(name k) v]))
                           (into {}))
         ;; also, HTTP-kit perplexingly does not seem to parse the query string. So, we should because why not?
-        query-params (parse-query-string (:query-string req))]
+        query-params (parse-params (:query-string req))]
     (assoc
      req
      :handler (:handler routed)
