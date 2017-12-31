@@ -128,18 +128,30 @@
     res
     {:handler :not-found}))
 
+(defn parse-query-string
+  [query-string]
+  (if (empty? query-string)
+    {}
+    (->> (clojure.string/split query-string #"&")
+             (map #(clojure.string/split % #"="))
+             (into {}))))
+
 (defn routed
   [req]
   (let [routed (route-request req)
         route-params (->> routed :route-params
                           ; HTTP-kit parses parameters out to string maps, not keyword maps. Lets be consistent.
                           (map (fn [[k v]] [(name k) v]))
-                          (into {}))]
+                          (into {}))
+        ;; also, HTTP-kit perplexingly does not seem to parse the query string. So, we should because why not?
+        query-params (parse-query-string (:query-string req))]
     (assoc
      req
      :handler (:handler routed)
      :route-params (or route-params {})
-     :params (merge (:params req) route-params))))
+     :query-params query-params
+     ;; note that POST and route params get priority over query params here
+     :params (merge query-params (:params req) route-params))))
 
 (defn routes-handler
   [req]
