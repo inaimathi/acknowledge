@@ -133,7 +133,8 @@
   (if (empty? param-string)
     {}
     (->> (clojure.string/split param-string #"&")
-         (map #(clojure.string/split % #"="))
+         (map #(let [pair (clojure.string/split % #"=")]
+                 (if (second pair) pair [(first pair) nil])))
          (into {}))))
 
 (defn routed
